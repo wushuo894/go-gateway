@@ -1,9 +1,15 @@
 package base
 
 import (
-	"go-gateway/tb"
 	"time"
 )
+
+type QueueType struct {
+	Ts     int64                   `json:"ts"`
+	Values *map[string]interface{} `json:"values"`
+}
+
+var Queue = &map[string][]QueueType{}
 
 type ConnectorBase interface {
 	// Run 运行
@@ -13,17 +19,21 @@ type ConnectorBase interface {
 	ServerSideRpcHandler()
 }
 
+// Run 运行
+func (cb ConfigBase) Run() {
+}
+
 // Telemetry 上送设备数据
 func (cb ConfigBase) Telemetry() {
 	ts := time.Now().UnixMilli()
 
-	queueType := tb.QueueType{
+	queueType := QueueType{
 		Ts: ts,
-		Values: map[string]interface{}{
+		Values: &map[string]interface{}{
 			"temperature": 42,
 			"humidity":    80,
 		},
 	}
 
-	tb.Queue[cb.DeviceName] = []tb.QueueType{queueType}
+	(*Queue)[cb.DeviceName] = []QueueType{queueType}
 }

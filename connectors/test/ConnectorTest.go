@@ -7,6 +7,7 @@ import (
 // Run 运行
 func (c ConfigTest) Run() {
 	for {
+		println(c.DeviceName)
 		c.Telemetry()
 		time.Sleep(1 * time.Second)
 	}
