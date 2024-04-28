@@ -1,0 +1,40 @@
+{
+  "port": "/dev/tty.usbserial-B00282SI",
+  "unitId": 2,
+  "baudrate": 9600,
+  "stopbits": 1,
+  "databits": 8,
+  /*
+    NO_PARITY,
+    ODD_PARITY,
+    EVEN_PARITY,
+    MARK_PARITY,
+    SPACE_PARITY
+  */
+  "parity": "ODD_PARITY",
+  "timeseries": [
+    {
+      "tag": "温度",
+      "type": "INT16",
+      "functionCode": 3,
+      "objectsCount": 1,
+      "address": 0
+    },
+    {
+      "tag": "湿度",
+      "type": "INT16",
+      "functionCode": 3,
+      "objectsCount": 1,
+      "address": 1
+    }
+  ],
+  "rpc": [
+    {
+      "tag": "getValue",
+      "type": "INT16",
+      "functionCode": 3,
+      "objectsCount": 1,
+      "address": 0
+    }
+  ]
+}
