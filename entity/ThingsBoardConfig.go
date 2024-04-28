@@ -8,7 +8,7 @@ type ThingsBoardConfig struct {
 	/**
 	端口
 	*/
-	Port int32 `json:"port"`
+	Port int `json:"port"`
 	/**
 	客户端ID
 	*/

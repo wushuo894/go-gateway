@@ -18,8 +18,4 @@ type ConfigBase struct {
 	文件
 	*/
 	FileName string `json:"file_name"`
-	/**
-	设备连接
-	*/
-	Connector *ConnectorBase `json:"connector"`
 }
