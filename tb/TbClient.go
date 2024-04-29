@@ -4,14 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/titanous/json5"
 	"go-gateway/connectors/base"
-	"go-gateway/connectors/test"
 	"go-gateway/util"
 	"io"
 	"log"
 	"os"
-	"reflect"
 	"strconv"
 	"time"
 )
@@ -26,7 +23,9 @@ func Connect() mqtt.Client {
 
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker("tcp://" + host + ":" + strconv.Itoa(port))
+	opts.SetAutoReconnect(true)
 	opts.SetUsername(userName)
+	opts.ConnectTimeout = 10 * time.Second
 	if len(password) > 0 {
 		opts.SetPassword(password)
 	}
@@ -37,26 +36,53 @@ func Connect() mqtt.Client {
 
 	client := mqtt.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		log.Fatalln(token.Error())
+		log.Println("Error connecting to mqtt server", token.Error())
 	}
 
-	client.Connect()
+	connectors := &util.Config.Connectors
 
-	client.Subscribe("v1/gateway/rpc", 0, func(client mqtt.Client, msg mqtt.Message) {
+	client.Subscribe("v1/gateway/rpc", 1, func(client mqtt.Client, msg mqtt.Message) {
+		m := map[string]any{}
+		err := json.Unmarshal(msg.Payload(), &m)
+		if err != nil {
+			log.Println(err)
+		}
+		device := m["device"].(string)
 
+		for _, configBase := range *connectors {
+			if configBase.DeviceName != device {
+				continue
+			}
+			if &configBase.Connector == nil {
+				log.Fatalln("Connector Not Found")
+			}
+			s, _ := json.Marshal(m)
+			log.Println(string(s))
+			data := m["data"].(map[string]any)
+			ret := (*configBase.Connector).ServerSideRpcHandler(data)
+			m["id"] = data["id"]
+			m["data"] = ret
+			s, _ = json.Marshal(m)
+			token := client.Publish(msg.Topic(), byte(1), false, s)
+			token.Wait()
+			log.Println(string(s))
+		}
 	})
 
 	go func() {
 		for {
 			time.Sleep(3 * time.Second)
-			jsonData, _ := json.Marshal(base.Queue)
-			println(string(jsonData))
-			client.Publish("v1/gateway/telemetry", 1, false, string(jsonData))
+			jsonData, err := json.Marshal(base.Queue)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(string(jsonData))
+			client.Publish("v1/gateway/telemetry", 1, false, string(jsonData)).Wait()
 		}
 	}()
 
 	go func() {
-		for _, configBase := range util.Config.Connectors {
+		for _, configBase := range *connectors {
 			fileName := configBase.FileName
 			file, err := os.Open("config/" + fileName)
 			if err != nil {
@@ -65,14 +91,11 @@ func Connect() mqtt.Client {
 			}
 			byteValue, err := io.ReadAll(file)
 			if err != nil {
-				println(err)
+				log.Fatalln(err)
 			}
-			c := reflect.New(util.ConfigMap[configBase.DeviceType])
-			connectorBase := c.Elem().Interface().(test.ConfigTest)
-			json5.Unmarshal(byteValue, &connectorBase)
-			println(&connectorBase)
-
-			//go connectorBase.Run()
+			connectorBase := util.ConfigFuncMap[configBase.DeviceType](byteValue, *configBase)
+			configBase.Connector = &connectorBase
+			go connectorBase.Run()
 		}
 	}()
 
