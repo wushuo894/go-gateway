@@ -5,8 +5,8 @@ import (
 )
 
 type QueueType struct {
-	Ts     int64                   `json:"ts"`
-	Values *map[string]interface{} `json:"values"`
+	Ts     int64                  `json:"ts"`
+	Values map[string]interface{} `json:"values"`
 }
 
 var Queue = &map[string][]QueueType{}
@@ -16,7 +16,7 @@ type ConnectorBase interface {
 	Run()
 
 	// ServerSideRpcHandler TB > gateway 数据
-	ServerSideRpcHandler()
+	ServerSideRpcHandler(m map[string]any) any
 }
 
 // Run 运行
@@ -24,15 +24,12 @@ func (cb ConfigBase) Run() {
 }
 
 // Telemetry 上送设备数据
-func (cb ConfigBase) Telemetry() {
+func (cb ConfigBase) Telemetry(values *map[string]any) {
 	ts := time.Now().UnixMilli()
 
 	queueType := QueueType{
-		Ts: ts,
-		Values: &map[string]interface{}{
-			"temperature": 42,
-			"humidity":    80,
-		},
+		Ts:     ts,
+		Values: *values,
 	}
 
 	(*Queue)[cb.DeviceName] = []QueueType{queueType}

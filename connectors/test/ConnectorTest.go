@@ -1,19 +1,15 @@
 package test
 
-import (
-	"time"
-)
-
 // Run 运行
 func (c ConfigTest) Run() {
-	for {
-		println(c.DeviceName)
-		c.Telemetry()
-		time.Sleep(1 * time.Second)
-	}
+	//for {
+	//	println(c.A)
+	//	c.Telemetry()
+	//	time.Sleep(1 * time.Second)
+	//}
 }
 
 // ServerSideRpcHandler TB > gateway 数据
-func (ConfigTest) ServerSideRpcHandler() {
-
+func (ConfigTest) ServerSideRpcHandler(m map[string]any) any {
+	return "1111"
 }

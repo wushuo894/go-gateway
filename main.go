@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-
 	util.Load()
 
 	tb.Connect()
