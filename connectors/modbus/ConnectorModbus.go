@@ -15,10 +15,16 @@ func (c ConfigModbus) Run() {
 			if err != nil {
 				log.Println("Error in item:", infoModbus, err)
 			}
-			m[infoModbus.Tag] = ret
+			if ret != nil {
+				m[infoModbus.Tag] = ret
+				continue
+			}
+
+			time.Sleep(1 * time.Second)
 		}
-		c.Telemetry(&m)
-		time.Sleep(1 * time.Second)
+		if len(m) > 0 {
+			go c.Telemetry(&m)
+		}
 	}
 }
 

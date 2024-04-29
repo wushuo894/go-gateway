@@ -3,7 +3,6 @@ package modbus
 import (
 	"encoding/binary"
 	"github.com/goburrow/modbus"
-	"log"
 	"strconv"
 )
 
@@ -47,24 +46,30 @@ func (c ConfigModbus) Func(client modbus.Client, info InfoModbus, value any) (re
 	return m[info.FunctionCode]()
 }
 
-func (c ConfigModbus) item(info InfoModbus, value any) (any, error) {
-	handler := modbus.NewRTUClientHandler(c.Port)
-	handler.BaudRate = c.Baudrate
-	handler.DataBits = c.Databits
-	handler.Parity = c.Parity
-	handler.StopBits = c.Stopbits
-	handler.SlaveId = byte(c.UnitId)
+var HandleMap = map[string]*modbus.RTUClientHandler{}
 
-	err := handler.Connect()
-	if err != nil {
-		return nil, err
-	}
-	defer func(handler *modbus.RTUClientHandler) {
-		err := handler.Close()
+func (c ConfigModbus) item(info InfoModbus, value any) (any, error) {
+	var handler *modbus.RTUClientHandler = HandleMap[c.Port]
+
+	if handler == nil {
+		handler = modbus.NewRTUClientHandler(c.Port)
+		handler.BaudRate = c.Baudrate
+		handler.DataBits = c.Databits
+		handler.Parity = c.Parity
+		handler.StopBits = c.Stopbits
+		handler.SlaveId = byte(c.UnitId)
+		err := handler.Connect()
 		if err != nil {
-			log.Fatalln(err)
+			return nil, err
 		}
-	}(handler)
+	}
+
+	//defer func(handler *modbus.RTUClientHandler) {
+	//	err := handler.Close()
+	//	if err != nil {
+	//		log.Fatalln(err)
+	//	}
+	//}(handler)
 	client := modbus.NewClient(handler)
 	results, err := c.Func(client, info, value)
 	if err != nil {

@@ -1,6 +1,6 @@
 {
   "port": "/dev/tty.usbserial-B00282SI",
-  "unitId": 1,
+  "unitId": 2,
   "baudrate": 9600,
   "stopbits": 1,
   "databits": 8,
