@@ -3,7 +3,6 @@ package modbus
 import (
 	"encoding/binary"
 	"github.com/goburrow/modbus"
-	"github.com/goburrow/serial"
 	"log"
 	"strconv"
 )
@@ -11,6 +10,10 @@ import (
 func (c ConfigModbus) Func(client modbus.Client, info InfoModbus, value any) (results []byte, err error) {
 	address := info.Address
 	count := info.ObjectsCount
+
+	if err != nil {
+		return nil, err
+	}
 
 	m := map[int]func() (results []byte, err error){
 		modbus.FuncCodeReadDiscreteInputs: func() (results []byte, err error) {
@@ -45,15 +48,6 @@ func (c ConfigModbus) Func(client modbus.Client, info InfoModbus, value any) (re
 }
 
 func (c ConfigModbus) item(info InfoModbus, value any) (any, error) {
-	serial.Open(&serial.Config{
-		Address:  "",
-		BaudRate: 0,
-		DataBits: 0,
-		StopBits: 0,
-		Parity:   "",
-		Timeout:  0,
-		RS485:    serial.RS485Config{},
-	})
 	handler := modbus.NewRTUClientHandler(c.Port)
 	handler.BaudRate = c.Baudrate
 	handler.DataBits = c.Databits
