@@ -7,17 +7,15 @@ import (
 
 // Run 运行
 func (c ConfigModbus) Run() {
-
 	for {
 		m := map[string]any{}
 		for _, infoModbus := range c.Timeseries {
 			ret, err := c.item(infoModbus, nil)
 			if err != nil {
-				log.Println("Error in item:", infoModbus, err)
+				log.Println("Run Error in item:", c.DeviceName, infoModbus, err)
 			}
 			if ret != nil {
 				m[infoModbus.Tag] = ret
-				continue
 			}
 
 			time.Sleep(1 * time.Second)
@@ -25,6 +23,7 @@ func (c ConfigModbus) Run() {
 		if len(m) > 0 {
 			go c.Telemetry(&m)
 		}
+		time.Sleep(1 * time.Second)
 	}
 }
 

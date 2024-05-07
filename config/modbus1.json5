@@ -18,14 +18,16 @@
       "type": "INT16",
       "functionCode": 3,
       "objectsCount": 1,
-      "address": 0
+      "address": 0,
+      "take": 0.1
     },
     {
       "tag": "湿度",
       "type": "INT16",
       "functionCode": 3,
       "objectsCount": 2,
-      "address": 1
+      "address": 1,
+      "take": 0.1
     }
   ],
   "rpc": [
