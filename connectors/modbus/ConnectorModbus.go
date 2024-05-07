@@ -21,7 +21,7 @@ func (c ConfigModbus) Run() {
 			time.Sleep(1 * time.Second)
 		}
 		if len(m) > 0 {
-			go c.Telemetry(&m)
+			c.Telemetry(&m)
 		}
 		time.Sleep(1 * time.Second)
 	}
