@@ -41,6 +41,7 @@ func Connect() mqtt.Client {
 
 	connectors := &util.Config.Connectors
 
+	// RPC
 	client.Subscribe("v1/gateway/rpc", 1, func(client mqtt.Client, msg mqtt.Message) {
 		m := map[string]any{}
 		err := json.Unmarshal(msg.Payload(), &m)
@@ -67,6 +68,13 @@ func Connect() mqtt.Client {
 			token.Wait()
 			log.Println(string(s))
 		}
+	})
+
+	// 共享属性
+	client.Subscribe("v1/gateway/attributes", 1, func(client mqtt.Client, msg mqtt.Message) {
+		// {"data":{"test":"123"},"device":"无线空调控制器"}
+		log.Println("v1/gateway/attributes")
+		log.Println(string(msg.Payload()))
 	})
 
 	go func() {

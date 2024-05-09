@@ -17,11 +17,11 @@
       "device_type": "MODBUS",
       "file_name": "modbus1.json5"
     },
-    {
-      "device_name": "温湿度",
-      "device_type": "MODBUS",
-      "file_name": "modbus2.json5"
-    }
+//    {
+//      "device_name": "温湿度",
+//      "device_type": "MODBUS",
+//      "file_name": "modbus2.json5"
+//    }
     //    {
     //      "device_name": "test",
     //      "device_type": "TEST",
