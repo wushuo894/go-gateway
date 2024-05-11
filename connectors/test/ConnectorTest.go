@@ -10,6 +10,11 @@ func (c ConfigTest) Run() {
 }
 
 // ServerSideRpcHandler TB > gateway 数据
-func (ConfigTest) ServerSideRpcHandler(m map[string]any) any {
+func (c ConfigTest) ServerSideRpcHandler(m map[string]any) any {
 	return "1111"
+}
+
+// AttributeUpdatesHandler 更新共享属性
+func (c ConfigTest) AttributeUpdatesHandler(m map[string]any) {
+
 }
