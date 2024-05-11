@@ -25,13 +25,30 @@
       "take": 0.1
     }
   ],
+  "attributeUpdates": [
+    {
+      "tag": "setValue",
+      "type": "16int",
+      "functionCode": 6,
+      "objectsCount": 2,
+      "address": 13,
+      "value": 100
+    }
+  ],
   "rpc": [
     {
       "tag": "getValue",
       "type": "INT16",
       "functionCode": 3,
       "objectsCount": 2,
-      "address": 0
+      "address": 13
+    },
+    {
+      "tag": "setValue",
+      "type": "INT16",
+      "functionCode": 6,
+      "objectsCount": 2,
+      "address": 13
     }
   ]
 }

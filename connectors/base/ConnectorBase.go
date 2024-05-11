@@ -17,6 +17,9 @@ type ConnectorBase interface {
 
 	// ServerSideRpcHandler TB > gateway 数据
 	ServerSideRpcHandler(m map[string]any) any
+
+	// AttributeUpdatesHandler 更新共享属性
+	AttributeUpdatesHandler(m map[string]any)
 }
 
 // Run 运行

@@ -97,6 +97,6 @@ func Load() {
 	byteValue, err := io.ReadAll(file)
 	err = json5.Unmarshal(byteValue, &Config)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("Load ", err)
 	}
 }

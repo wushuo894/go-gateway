@@ -45,3 +45,20 @@ func (c ConfigModbus) ServerSideRpcHandler(m map[string]any) any {
 	}
 	return nil
 }
+
+// AttributeUpdatesHandler 更新共享属性
+func (c ConfigModbus) AttributeUpdatesHandler(m map[string]any) {
+	for _, update := range c.AttributeUpdates {
+		tag := update.Tag
+		for k, v := range m {
+			if k != tag {
+				continue
+			}
+			_, err := c.item(update, uint16(v.(float64)))
+			if err != nil {
+				log.Println("Error in item:", update, err)
+			}
+			return
+		}
+	}
+}

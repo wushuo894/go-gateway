@@ -75,11 +75,25 @@ func Connect() mqtt.Client {
 		// {"data":{"test":"123"},"device":"无线空调控制器"}
 		log.Println("v1/gateway/attributes")
 		log.Println(string(msg.Payload()))
+
+		m := map[string]any{}
+		err := json.Unmarshal(msg.Payload(), &m)
+		if err != nil {
+			log.Println(err)
+		}
+		device := m["device"].(string)
+		for _, configBase := range *connectors {
+			if configBase.DeviceName != device {
+				continue
+			}
+			data := m["data"].(map[string]any)
+			(*configBase.Connector).AttributeUpdatesHandler(data)
+		}
 	})
 
 	go func() {
 		for {
-			time.Sleep(3 * time.Second)
+			time.Sleep(5 * time.Second)
 			jsonData, err := json.Marshal(base.Queue)
 			if err != nil {
 				log.Fatalln(err)
@@ -95,7 +109,7 @@ func Connect() mqtt.Client {
 			file, err := os.Open("config/" + fileName)
 			if err != nil {
 				fmt.Println("无法打开文件:", err)
-				return
+				continue
 			}
 			byteValue, err := io.ReadAll(file)
 			if err != nil {
