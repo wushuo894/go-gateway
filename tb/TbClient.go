@@ -96,12 +96,19 @@ func Connect() mqtt.Client {
 	go func() {
 		for {
 			time.Sleep(3 * time.Second)
+			base.QueueLocker.Lock()
+			if len(*base.Queue) < 1 {
+				base.QueueLocker.Unlock()
+				continue
+			}
 			jsonData, err := json.Marshal(base.Queue)
 			if err != nil {
 				log.Println(err)
+				base.QueueLocker.Unlock()
 				continue
 			}
 			base.Queue = &map[string][]base.QueueType{}
+			base.QueueLocker.Unlock()
 			log.Println(string(jsonData))
 			client.Publish("v1/gateway/telemetry", 1, false, string(jsonData))
 		}
