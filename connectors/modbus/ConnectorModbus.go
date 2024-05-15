@@ -13,6 +13,7 @@ func (c ConfigModbus) Run() {
 			ret, err := c.item(infoModbus, nil)
 			if err != nil {
 				log.Println("Run Error in item:", c.DeviceName, infoModbus, err)
+				continue
 			}
 			if ret != nil {
 				m[infoModbus.Tag] = ret
@@ -20,9 +21,7 @@ func (c ConfigModbus) Run() {
 
 			time.Sleep(1 * time.Second)
 		}
-		if len(m) > 0 {
-			c.Telemetry(&m)
-		}
+		c.Telemetry(&m)
 		time.Sleep(1 * time.Second)
 	}
 }
@@ -54,10 +53,12 @@ func (c ConfigModbus) AttributeUpdatesHandler(m map[string]any) {
 			if k != tag {
 				continue
 			}
-			_, err := c.item(update, uint16(v.(float64)))
-			if err != nil {
-				log.Println("Error in item:", update, err)
-			}
+			go func() {
+				_, err := c.item(update, uint16(v.(float64)))
+				if err != nil {
+					log.Println("Error in item:", update, err)
+				}
+			}()
 			return
 		}
 	}

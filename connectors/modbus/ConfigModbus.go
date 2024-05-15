@@ -6,11 +6,11 @@ import (
 
 type ConfigModbus struct {
 	base.ConfigBase
-	UnitId           int          `json:"unitId"`
+	UnitId           uint8        `json:"unitId"`
 	Port             string       `json:"port"`
-	Baudrate         int          `json:"baudrate"`
-	Databits         int          `json:"databits"`
-	Stopbits         int          `json:"stopbits"`
+	Baudrate         uint         `json:"baudrate"`
+	Databits         uint         `json:"databits"`
+	Stopbits         uint         `json:"stopbits"`
 	Parity           string       `json:"parity"`
 	Timeseries       []InfoModbus `json:"timeseries"`
 	Rpc              []InfoModbus `json:"rpc"`
@@ -20,7 +20,7 @@ type ConfigModbus struct {
 type InfoModbus struct {
 	Tag string `json:"tag"`
 	//Type         reflect.Type
-	FunctionCode int     `json:"functionCode"`
+	FunctionCode uint8   `json:"functionCode"`
 	ObjectsCount uint16  `json:"objectsCount"`
 	Address      uint16  `json:"address"`
 	Take         float32 `json:"take"`

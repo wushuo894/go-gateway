@@ -1,102 +1,83 @@
 package modbus
 
 import (
-	"encoding/binary"
-	"github.com/grid-x/modbus"
+	"github.com/simonvetter/modbus"
 	"log"
-	"strconv"
 	"sync"
 	"time"
 )
 
-func (c ConfigModbus) Func(client modbus.Client, info InfoModbus, value any) (results []byte, err error) {
+func (c ConfigModbus) Func(client *modbus.ModbusClient, info InfoModbus, value any) (results any, err error) {
 	address := info.Address
-	count := info.ObjectsCount
-
-	m := map[int]func() (results []byte, err error){
-		modbus.FuncCodeReadDiscreteInputs: func() (results []byte, err error) {
-			return client.ReadDiscreteInputs(address, count)
-		},
-		modbus.FuncCodeReadCoils: func() (results []byte, err error) {
-			return client.ReadCoils(address, count)
-		},
-		modbus.FuncCodeWriteSingleCoil: func() (results []byte, err error) {
-			return client.WriteSingleCoil(address, value.(uint16))
-		},
-		modbus.FuncCodeWriteMultipleCoils: func() (results []byte, err error) {
-			return client.WriteMultipleCoils(address, count, value.([]byte))
-		},
-		modbus.FuncCodeReadInputRegisters: func() (results []byte, err error) {
-			return client.ReadInputRegisters(address, count)
-		},
-		modbus.FuncCodeReadHoldingRegisters: func() (results []byte, err error) {
-			return client.ReadHoldingRegisters(address, count)
-		},
-		modbus.FuncCodeWriteSingleRegister: func() (results []byte, err error) {
-			return client.WriteSingleRegister(address, value.(uint16))
-		},
-		modbus.FuncCodeWriteMultipleRegisters: func() (results []byte, err error) {
-			return client.WriteMultipleRegisters(address, count, value.([]byte))
-		},
-		modbus.FuncCodeReadFIFOQueue: func() (results []byte, err error) {
-			return client.ReadFIFOQueue(address)
+	m := map[uint8]func() (results any, err error){
+		0x03: func() (results any, err error) {
+			return client.ReadRegister(address, modbus.INPUT_REGISTER)
 		},
 	}
 	return m[info.FunctionCode]()
 }
 
 var (
-	HandleMap = map[string]modbus.Client{}
+	HandleMap = map[string]*modbus.ModbusClient{}
 	LockerMap = map[string]*sync.Mutex{}
 	Locker    = &sync.Mutex{}
 )
 
 func (c ConfigModbus) item(info InfoModbus, value any) (any, error) {
 	Locker.Lock()
-	client := HandleMap[c.Port+","+strconv.Itoa(c.UnitId)]
-	locker := LockerMap[c.Port]
+	defer Locker.Unlock()
+	//client := HandleMap[c.Port]
 
-	if locker == nil {
-		locker = &sync.Mutex{}
-		LockerMap[c.Port] = locker
+	client, err := modbus.NewClient(&modbus.ClientConfiguration{
+		URL:      "rtu://" + c.Port,
+		Speed:    c.Baudrate,        // default
+		DataBits: c.Databits,        // default, optional
+		Parity:   modbus.PARITY_ODD, // default, optional
+		StopBits: c.Stopbits,        // default if no parity, optional
+		Timeout:  3 * time.Second,
+	})
+	if err != nil {
+		log.Fatalln(err)
+		return nil, err
 	}
 
-	if client == nil {
-		handler := modbus.NewRTUClientHandler(c.Port)
-		handler.BaudRate = c.Baudrate
-		handler.DataBits = c.Databits
-		handler.Parity = c.Parity
-		handler.StopBits = c.Stopbits
-		handler.SlaveID = byte(c.UnitId)
-		handler.Timeout = 3 * time.Second
-		err := handler.Connect()
+	//if client == nil {
+	//	newClient, err := modbus.NewClient(&modbus.ClientConfiguration{
+	//		URL:      "rtu://" + c.Port,
+	//		Speed:    c.Baudrate,        // default
+	//		DataBits: c.Databits,        // default, optional
+	//		Parity:   modbus.PARITY_ODD, // default, optional
+	//		StopBits: c.Stopbits,        // default if no parity, optional
+	//		Timeout:  3 * time.Second,
+	//	})
+	//	if err != nil {
+	//		log.Fatalln(err)
+	//		return nil, err
+	//	}
+	//
+	//	HandleMap[c.Port] = newClient
+	//	client = newClient
+	//}
+
+	err = client.Open()
+	defer func(client *modbus.ModbusClient) {
+		err := client.Close()
 		if err != nil {
-			Locker.Unlock()
-			log.Fatalln("Connect Error:", err)
-			return nil, err
+			log.Println(err)
 		}
-		log.Println("Connect ", c.Port)
-		client = modbus.NewClient(handler)
-		HandleMap[c.Port+","+strconv.Itoa(c.UnitId)] = client
+	}(client)
+	if err != nil {
+		log.Println(err)
+		return nil, err
 	}
-	Locker.Unlock()
 
-	locker.Lock()
-	results, err := c.Func(client, info, value)
-	locker.Unlock()
+	err = client.SetUnitId(c.UnitId)
 	if err != nil {
 		return nil, err
 	}
-	v := binary.BigEndian.Uint16(results)
-
-	var ok = float32(v)
-
-	take := info.Take
-	if take == 0 {
-		take = 1
+	results, err := c.Func(client, info, value)
+	if err != nil {
+		return results, err
 	}
-
-	resultStr := strconv.FormatFloat(float64(ok*take), 'f', 2, 64)
-
-	return resultStr, nil
+	return results, nil
 }
