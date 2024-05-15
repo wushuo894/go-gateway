@@ -67,6 +67,7 @@ func Connect() mqtt.Client {
 			token := client.Publish(msg.Topic(), byte(1), false, s)
 			token.Wait()
 			log.Println(string(s))
+			return
 		}
 	})
 
@@ -88,18 +89,21 @@ func Connect() mqtt.Client {
 			}
 			data := m["data"].(map[string]any)
 			(*configBase.Connector).AttributeUpdatesHandler(data)
+			return
 		}
 	})
 
 	go func() {
 		for {
-			time.Sleep(5 * time.Second)
+			time.Sleep(3 * time.Second)
 			jsonData, err := json.Marshal(base.Queue)
 			if err != nil {
-				log.Fatalln(err)
+				log.Println(err)
+				continue
 			}
+			base.Queue = &map[string][]base.QueueType{}
 			log.Println(string(jsonData))
-			client.Publish("v1/gateway/telemetry", 1, false, string(jsonData)).Wait()
+			client.Publish("v1/gateway/telemetry", 1, false, string(jsonData))
 		}
 	}()
 

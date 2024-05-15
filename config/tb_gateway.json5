@@ -13,7 +13,12 @@
   },
   "connectors": [
     {
-      "device_name": "无线空调控制器",
+      "device_name": "无线空调控制器1",
+      "device_type": "MODBUS",
+      "file_name": "modbus0.json5"
+    },
+    {
+      "device_name": "无线空调控制器2",
       "device_type": "MODBUS",
       "file_name": "modbus1.json5"
     },
