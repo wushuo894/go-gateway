@@ -13,6 +13,9 @@ func (c ConfigModbus) Func(client *modbus.ModbusClient, info InfoModbus, value a
 		0x03: func() (results any, err error) {
 			return client.ReadRegister(address, modbus.INPUT_REGISTER)
 		},
+		0x06: func() (results any, err error) {
+			return nil, client.WriteRegister(address, value.(uint16))
+		},
 	}
 	return m[info.FunctionCode]()
 }
@@ -26,8 +29,6 @@ var (
 func (c ConfigModbus) item(info InfoModbus, value any) (any, error) {
 	Locker.Lock()
 	defer Locker.Unlock()
-	//client := HandleMap[c.Port]
-
 	client, err := modbus.NewClient(&modbus.ClientConfiguration{
 		URL:      "rtu://" + c.Port,
 		Speed:    c.Baudrate,        // default
@@ -36,28 +37,11 @@ func (c ConfigModbus) item(info InfoModbus, value any) (any, error) {
 		StopBits: c.Stopbits,        // default if no parity, optional
 		Timeout:  3 * time.Second,
 	})
+
 	if err != nil {
 		log.Fatalln(err)
 		return nil, err
 	}
-
-	//if client == nil {
-	//	newClient, err := modbus.NewClient(&modbus.ClientConfiguration{
-	//		URL:      "rtu://" + c.Port,
-	//		Speed:    c.Baudrate,        // default
-	//		DataBits: c.Databits,        // default, optional
-	//		Parity:   modbus.PARITY_ODD, // default, optional
-	//		StopBits: c.Stopbits,        // default if no parity, optional
-	//		Timeout:  3 * time.Second,
-	//	})
-	//	if err != nil {
-	//		log.Fatalln(err)
-	//		return nil, err
-	//	}
-	//
-	//	HandleMap[c.Port] = newClient
-	//	client = newClient
-	//}
 
 	err = client.Open()
 	defer func(client *modbus.ModbusClient) {
