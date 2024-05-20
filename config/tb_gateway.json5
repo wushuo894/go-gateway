@@ -12,26 +12,31 @@
     "user_name": "XkoIghnDAWqzRQF03jSe"
   },
   "connectors": [
-    {
-      "device_name": "无线空调控制器1",
-      "device_type": "MODBUS",
-      "file_name": "modbus0.json5"
-    },
-    {
-      "device_name": "无线空调控制器2",
-      "device_type": "MODBUS",
-      "file_name": "modbus1.json5"
-    },
+//    {
+//      "device_name": "无线空调控制器1",
+//      "device_type": "MODBUS",
+//      "file_name": "modbus0.json5"
+//    },
+//    {
+//      "device_name": "无线空调控制器2",
+//      "device_type": "MODBUS",
+//      "file_name": "modbus1.json5"
+//    },
 //    {
 //      "device_name": "温湿度",
 //      "device_type": "MODBUS",
 //      "file_name": "modbus2.json5"
 //    }
-    //    {
-    //      "device_name": "test",
-    //      "device_type": "TEST",
-    //      "file_name": "test.json5"
-    //    }
+        {
+          "device_name": "modbus-test",
+          "device_type": "MODBUS",
+          "file_name": "modbus-test.json5"
+        }
+//        {
+//          "device_name": "test",
+//          "device_type": "TEST",
+//          "file_name": "test.json5"
+//        }
   ],
   "log_level": "INFO"
 }

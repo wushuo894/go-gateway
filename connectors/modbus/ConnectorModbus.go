@@ -10,6 +10,7 @@ func (c ConfigModbus) Run() {
 	for {
 		m := map[string]any{}
 		for _, infoModbus := range c.Timeseries {
+			time.Sleep(1 * time.Second)
 			ret, err := c.item(infoModbus, nil)
 			if err != nil {
 				log.Println("Run Error in item:", c.DeviceName, infoModbus, err)
@@ -18,8 +19,6 @@ func (c ConfigModbus) Run() {
 			if ret != nil {
 				m[infoModbus.Tag] = ret
 			}
-
-			time.Sleep(1 * time.Second)
 		}
 		c.Telemetry(&m)
 	}
