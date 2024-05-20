@@ -1,5 +1,5 @@
 {
-  "port": "/dev/tty.usbserial-B00282SI",
+  "port": "rtu:///dev/tty.usbserial-B00282SI",
   "unitId": 1,
   "baudrate": 9600,
   "stopbits": 1,
