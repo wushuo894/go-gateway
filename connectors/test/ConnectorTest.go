@@ -1,12 +1,17 @@
 package test
 
+import "time"
+
 // Run 运行
 func (c ConfigTest) Run() {
-	//for {
-	//	println(c.A)
-	//	c.Telemetry()
-	//	time.Sleep(1 * time.Second)
-	//}
+
+	for {
+		println(c.A)
+		c.Telemetry(&map[string]any{
+			"a": c.A,
+		})
+		time.Sleep(1 * time.Second)
+	}
 }
 
 // ServerSideRpcHandler TB > gateway 数据
