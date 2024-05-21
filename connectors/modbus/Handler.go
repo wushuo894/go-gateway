@@ -28,15 +28,22 @@ var (
 func (c ConfigModbus) item(info InfoModbus, value any) (any, error) {
 	Locker.Lock()
 	defer Locker.Unlock()
-	client := HandleMap[c.Port]
+	client := HandleMap[c.Port+"#"+string(c.UnitId)]
 
 	if client == nil {
+		parity := c.Parity
+		m := map[string]uint{
+			"O": modbus.PARITY_ODD,
+			"E": modbus.PARITY_EVEN,
+			"N": modbus.PARITY_NONE,
+		}
+		parityValue := m[parity]
 		newClient, err := modbus.NewClient(&modbus.ClientConfiguration{
 			URL:      c.Port,
-			Speed:    c.Baudrate,         // default
-			DataBits: c.Databits,         // default, optional
-			Parity:   modbus.PARITY_NONE, // default, optional
-			StopBits: c.Stopbits,         // default if no parity, optional
+			Speed:    c.Baudrate,  // default
+			DataBits: c.Databits,  // default, optional
+			Parity:   parityValue, // default, optional
+			StopBits: c.Stopbits,  // default if no parity, optional
 			Timeout:  3 * time.Second,
 		})
 		if err != nil {
@@ -44,7 +51,7 @@ func (c ConfigModbus) item(info InfoModbus, value any) (any, error) {
 			return nil, err
 		}
 		client = newClient
-		HandleMap[c.Port] = client
+		HandleMap[c.Port+"#"+string(c.UnitId)] = client
 
 		err = client.Open()
 		if err != nil {
